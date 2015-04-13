@@ -49,7 +49,15 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
     setSMS4Key(key);
     unsigned long long fileSize =[self getFileSize:sourcePath];
     if (fileSize <= kFileLimit) {
-        NSData* fileData = [NSData dataWithContentsOfFile:sourcePath options:NSDataReadingMappedIfSafe error:nil];
+        NSError *fileLoadError = nil;
+        NSData* fileData = [NSData dataWithContentsOfFile:sourcePath options:NSDataReadingMappedIfSafe error:&fileLoadError];
+        if (fileLoadError) {
+            if (callback) {
+                callback(NO,fileLoadError);
+            }
+            
+            return;
+        }
         NSData* encryptedData = [self getEncryptData:fileData lastSlot:YES];
         [self saveFile:encryptedData location:destinationPath];
     } else {
@@ -128,7 +136,35 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
 
 -(void)encryptFileFromUrl:(NSURL*)fileUrl withKey:(uint32_t*)key saveFilePath:(NSString*)destinationPath completion:(CompletionBlock)callBack
 {
-    
+    NSError* error = nil;
+    if (destinationPath == nil) {
+        error = [self createErrorForDescription:kcDestinationDirectoryErrorDescription errorCode:SFErrorPathIsNull reason:kcPathIsNullErrorReason suggestion:kcDirectoryErrorSuggestion];
+        if (callBack) {
+            callBack(NO,error);
+        }
+        return;
+    }
+    NSNumber *fileSizeValue = nil;
+    NSError *fileSizeError = nil;
+    [fileUrl getResourceValue:&fileSizeValue forKey:NSURLFileSizeKey error:&fileSizeError];
+    if (fileSizeError) {
+        callBack(NO,fileSizeError);
+    }
+    setSMS4Key(key);
+    if ([fileSizeValue unsignedIntegerValue] <= kFileLimit) {
+        NSError *fileLoadError = nil;
+        NSData* fileData = [NSData dataWithContentsOfURL:fileUrl options:NSDataReadingMappedIfSafe error:&fileLoadError];
+        if (fileLoadError) {
+            if (callBack) {
+                callBack(NO,fileLoadError);
+            }
+            return;
+        }
+        NSData* encryptedData = [self getEncryptData:fileData lastSlot:YES];
+        [self saveFile:encryptedData location:destinationPath];
+    } else {
+        //TODO: Read data and encrypt more than 8 mb data from NSUrl.
+    }
 }
 
 #pragma mark - Encryption helper Methods
@@ -160,7 +196,15 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
     setSMS4Key(key);
     unsigned long long fileSize =[self getFileSize:sourcePath];
     if (fileSize <= kFileLimit+1) {
-        NSData *encryptData =[NSData dataWithContentsOfFile:sourcePath options:NSDataReadingMappedIfSafe error:nil];
+        NSError* fileLoadError = nil;
+        NSData *encryptData =[NSData dataWithContentsOfFile:sourcePath options:NSDataReadingMappedIfSafe error:&fileLoadError];
+        if (fileLoadError) {
+            if (callback) {
+                callback(NO,fileLoadError);
+            }
+            
+            return;
+        }
         NSData* decryptedData =  [self getDecryptData:encryptData lastSlot:YES];
         [self saveFile:decryptedData location:destinationPath];
     } else {
