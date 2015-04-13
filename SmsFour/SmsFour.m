@@ -151,7 +151,8 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
         callBack(NO,fileSizeError);
     }
     setSMS4Key(key);
-    if ([fileSizeValue unsignedIntegerValue] <= kFileLimit) {
+    NSUInteger fileSize = [fileSizeValue unsignedIntegerValue];
+    if (fileSize <= kFileLimit) {
         NSError *fileLoadError = nil;
         NSData* fileData = [NSData dataWithContentsOfURL:fileUrl options:NSDataReadingMappedIfSafe error:&fileLoadError];
         if (fileLoadError) {
@@ -163,7 +164,29 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
         NSData* encryptedData = [self getEncryptData:fileData lastSlot:YES];
         [self saveFile:encryptedData location:destinationPath];
     } else {
-        //TODO: Read data and encrypt more than 8 mb data from NSUrl.
+        __weak typeof(self) weakSelf = self;
+        void (^encryptAndSaveSlot)(unsigned long long, NSURL*, NSString*,NSUInteger,BOOL) = ^(unsigned long long offset, NSURL* url, NSString* destinationPath, NSUInteger length,BOOL isLastSlot){
+            NSData* data = [weakSelf readBytes:length ofOffset:offset fromFileUrl:url];
+            NSData* encryptedData = [weakSelf getEncryptData:data lastSlot:isLastSlot];
+            [weakSelf writeData:encryptedData ofOffset:offset fromFile:destinationPath];
+        };
+        
+        NSUInteger completeSlotCount = (NSUInteger)fileSize/kFileLimit;
+        NSUInteger lastSlotBytesCount = (NSUInteger)fileSize%kFileLimit;
+        unsigned long long offset = 0;
+        for (int slotCount = 0; slotCount < completeSlotCount; slotCount++) {
+            @autoreleasepool {
+                encryptAndSaveSlot(offset,fileUrl,destinationPath,kFileLimit,NO);
+                offset = offset + kFileLimit;
+            }
+        }
+        if (lastSlotBytesCount>0) {
+            encryptAndSaveSlot(offset,fileUrl,destinationPath,lastSlotBytesCount, YES);
+        }
+
+    }
+    if (callBack) {
+        callBack(YES,error);
     }
 }
 
@@ -464,6 +487,14 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
 -(NSData*)readBytes:(NSUInteger)length ofOffset:(unsigned long long)offset fromFile:(NSString*)filePath
 {
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:filePath];
+    [fileHandle seekToFileOffset:offset];
+    NSData *data = [fileHandle readDataOfLength:length];
+    return data;
+}
+
+-(NSData*)readBytes:(NSUInteger)length ofOffset:(unsigned long long)offset fromFileUrl:(NSURL*)url
+{
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingFromURL:url error:nil];
     [fileHandle seekToFileOffset:offset];
     NSData *data = [fileHandle readDataOfLength:length];
     return data;
