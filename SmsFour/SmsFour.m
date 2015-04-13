@@ -126,6 +126,11 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
     [self encryptFile:filePath withKey:key saveFilePath:destinationPath completion:callback];
 }
 
+-(void)encryptFileFromUrl:(NSURL*)fileUrl withKey:(uint32_t*)key saveFilePath:(NSString*)destinationPath completion:(CompletionBlock)callBack
+{
+    
+}
+
 #pragma mark - Encryption helper Methods
 
 -(NSData*)getEncryptData:(NSData*)data lastSlot:(BOOL)isLastSlot

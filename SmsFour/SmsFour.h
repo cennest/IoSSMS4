@@ -83,12 +83,12 @@ typedef void (^CompletionBlock)(BOOL success, NSError *error);
  */
 -(void)encryptData:(NSData*)data withKey:(uint32_t*)key saveFilePath:(NSString*)destinationPath completion:(CompletionBlock)callBack;
 /**
- *  <#Description#>
+ *  This method encrypt data of givien NSUrl and saves encrypted data in destinationPath.
  *
- *  @param fileUrl         <#fileUrl description#>
- *  @param key             <#key description#>
- *  @param destinationPath <#destinationPath description#>
- *  @param callBack        <#callBack description#>
+ *  @param fileUrl         Source file url.
+ *  @param key             SMS4's 128 bits key use in encryption task. if key is null, the method will use default key. NOTE: Use same key to decrypt file.
+ *  @param destinationPath Encrypted data store in destinationPath, destinationPath should not nil, otherwise method call callBack block with SFErrorDestinationDirectoryNotFound error.
+ *  @param callBack        Callback is block, notifies that method completed encryption task. it has two parameters a)success: BOOL value, status of encryption task. b)error: NSError, description of error if problem occurs.
  */
 -(void)encryptFileFromUrl:(NSURL*)fileUrl withKey:(uint32_t*)key saveFilePath:(NSString*)destinationPath completion:(CompletionBlock)callBack;
 
