@@ -6,8 +6,11 @@
 //  Copyright (c) 2015 cennest. All rights reserved.
 //
 
+#import <CommonCrypto/CommonDigest.h>
+
 #import "SmsFour.h"
 #import "sms4.h"
+
 
 static NSUInteger const kFileLimit = 8000000;
 
@@ -552,6 +555,28 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
                                          code:code
                                      userInfo:userInfo];
     return error;
+}
+
+#pragma mark - Create SMS4 key
+
+-(uint32_t*)createKeyFormString:(NSString*)keyString
+{
+    //Refer following link.
+    //http://stackoverflow.com/questions/18122192/custom-string-to-128-bit-string and http://stackoverflow.com/questions/16059594/sha1-hash-producing-different-result-in-objective-c-and-c-net
+    const char* cString = [keyString cStringUsingEncoding:NSUTF8StringEncoding];
+    NSData* data1 = [NSData dataWithBytes:cString length:keyString.length];
+    uint8_t hash [CC_SHA1_DIGEST_LENGTH];
+    CC_SHA1(data1.bytes, data1.length, hash);
+    size_t size = sizeof(uint32_t)*4;
+    uint32_t *keyArray = (uint32_t*)malloc(size);
+    memset(keyArray, 0, size);
+    int lastByteIndex=0;
+    for (int i=0; i < 4 ; i++) {
+        uint32_t result = (hash[lastByteIndex]<<24) | (hash[lastByteIndex+1]<<16)| (hash[lastByteIndex+2]<<8) | hash[lastByteIndex+3];
+        keyArray[i]=result;
+        lastByteIndex=lastByteIndex+4;
+    }
+    return keyArray;
 }
 
 @end
