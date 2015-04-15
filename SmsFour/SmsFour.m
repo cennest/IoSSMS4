@@ -89,6 +89,17 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
     }
 }
 
+-(NSData*)encryptFile:(NSString *)filePath withKey:(uint32_t *)key
+{
+    NSError *fileLoadError = nil;
+    NSData* fileData = [NSData dataWithContentsOfFile:filePath options:NSDataReadingMappedIfSafe error:&fileLoadError];
+    if (filePath == nil || fileData == nil || fileLoadError != nil) {
+        return nil;
+    }
+    NSData* encryptedData = [self encryptData:fileData withKey:key];
+    return encryptedData;
+}
+
 -(NSData*)encryptData:(NSData*)data withKey:(uint32_t*)key
 {
     if (data == nil) {
@@ -268,6 +279,17 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
 {
     NSString* destinationPath = filePath;
     [self decryptFile:filePath withKey:key saveFilePath:destinationPath completion:callback];
+}
+
+-(NSData*)decryptFile:(NSString *)filePath withKey:(uint32_t *)key
+{
+    NSError *fileLoadError = nil;
+    NSData* fileData = [NSData dataWithContentsOfFile:filePath options:NSDataReadingMappedIfSafe error:&fileLoadError];
+    if (filePath == nil || fileData == nil || fileLoadError != nil) {
+        return nil;
+    }
+    NSData* decryptedData = [self decryptData:fileData withKey:key];
+    return decryptedData;
 }
 
 -(NSData*)decryptData:(NSData*)data withKey:(uint32_t*)key
