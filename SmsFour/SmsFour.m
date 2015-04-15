@@ -13,7 +13,7 @@
 
 
 static NSUInteger const kFileLimit = 8000000;
-
+static NSUInteger const kSMS4KeyArraySize = 4;
 static NSString* const kcSMSFourErrorDomain = @"SMSFourErrorDomain";
 
 static NSString* const kcSourceDirectoryErrorDescription = @"Source Directory not found.";
@@ -567,11 +567,11 @@ static NSString* const kcDataIsNilErrorSuggestion = @"Try to provide data some v
     NSData* data1 = [NSData dataWithBytes:cString length:keyString.length];
     uint8_t hash [CC_SHA1_DIGEST_LENGTH];
     CC_SHA1(data1.bytes, data1.length, hash);
-    size_t size = sizeof(uint32_t)*4;
+    size_t size = sizeof(uint32_t)*kSMS4KeyArraySize;
     uint32_t *keyArray = (uint32_t*)malloc(size);
     memset(keyArray, 0, size);
     int lastByteIndex=0;
-    for (int i=0; i < 4 ; i++) {
+    for (int i=0; i < kSMS4KeyArraySize ; i++) {
         uint32_t result = (hash[lastByteIndex]<<24) | (hash[lastByteIndex+1]<<16)| (hash[lastByteIndex+2]<<8) | hash[lastByteIndex+3];
         keyArray[i]=result;
         lastByteIndex=lastByteIndex+4;
