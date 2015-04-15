@@ -66,6 +66,15 @@ typedef void (^CompletionBlock)(BOOL success, NSError *error);
 /**
  *  This method encrypts data and immediately returns encrypted data. For performance issue don't use large data, use method [encryptFile:withKey:saveFilePath:completion:] to encrypt large data file.
  *
+ *  @param filePath Provide full file path with file name and extension, file should be available in given path otherwise method will send error message in completion block.
+ *  @param key      SMS4's 128 bits key use in encryption task. if key is null, the method will use default key. NOTE: Use same key to decrypt file.
+ *
+ *  @return decrypted data of type NSData.
+ */
+-(NSData*)encryptFile:(NSString*)filePath withKey:(uint32_t*)key;
+/**
+ *  This method encrypts data and immediately returns encrypted data. For performance issue don't use large data, use method [encryptFile:withKey:saveFilePath:completion:] to encrypt large data file.
+ *
  *  @param data send NSData, which you want to encrypt.
  *  @param key  SMS4's 128 bits key use in encryption task. if key is null, the method will use default key. NOTE: Use same key to decrypt file.
  *  @param destinationPath Encrypted data store in destinationPath, if nil, method will overwrite source file with encrypted data.
@@ -111,6 +120,15 @@ typedef void (^CompletionBlock)(BOOL success, NSError *error);
  *  @param callback Callback is block, notifies that method completed decryption task. it has two parameter a)success: BOOL value, status of decryption task. b)error: NSError, description of error if problem occurs.
  */
 -(void)decryptFile:(NSString*)filePath withKey:(uint32_t*)key completion:(CompletionBlock)callback;
+/**
+ *  This method decrypts data and immediately returns decrypted data. For performance issue don't use large data, use method [decryptFile:withKey:saveFilePath:completion:] to decrypt large data file.
+ *
+ *  @param filePath Provide full file path with file name and extension, file should be available in given path otherwise method will send error message in completion block.
+ *  @param key      Use the same key, which was used in ecryption task.
+ *
+ *  @return decrypted data of type NSData.
+ */
+-(NSData*)decryptFile:(NSString*)filePath withKey:(uint32_t*)key;
 /**
  *  This method decrypts data and immediately returns decrypted data. For performance issue don't use large data, use method [decryptFile:withKey:saveFilePath:completion:] to decrypt large data file.
  *
