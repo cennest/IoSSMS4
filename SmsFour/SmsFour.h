@@ -148,14 +148,4 @@ typedef void (^CompletionBlock)(BOOL success, NSError *error);
  */
 -(void)decryptData:(NSData*)data withKey:(uint32_t*)key saveFilePath:(NSString*)destinationPath completion:(CompletionBlock)callBack;
 
-#pragma mark - Create Function
-/**
- *  Create SMS 4 key from NSString using SHA1 hash algorithms
- *
- *  @param keyString string key
- *
- *  @return SMS4 128 bit key crated using string key.
- */
--(uint32_t*)createKeyFormString:(NSString*)keyString;
-
 @end
