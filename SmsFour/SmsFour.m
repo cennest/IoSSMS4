@@ -6,14 +6,10 @@
 //  Copyright (c) 2015 cennest. All rights reserved.
 //
 
-#import <CommonCrypto/CommonDigest.h>
-
 #import "SmsFour.h"
 #import "sms4.h"
 
-
 static NSUInteger const kFileLimit = 8000000;
-static NSUInteger const kSMS4KeyArraySize = 4;
 static NSString* const kcSMSFourErrorDomain = @"SMSFourErrorDomain";
 
 static NSString* const kcSourceDirectoryErrorDescription = @"Source Directory not found.";
